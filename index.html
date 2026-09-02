@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Training Classifiers on Canadian Political Data</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Training Classifiers on Canadian Political Data</title><link rel="icon" type="image/png" href="page_icon.png"/><link rel="apple-touch-icon" href="page_icon.png"/><script>document.documentElement.setAttribute('data-nav',window.innerWidth>=1250?'open':'closed')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7814,20 +7814,29 @@ a.anchor-link {
   .jp-RenderedHTMLCommon table,.jp-OutputArea-output.jp-RenderedHTML{overflow-x:auto;display:block}
   .jp-InputPrompt,.jp-OutputPrompt{display:none!important}
   #site-nav{position:fixed;top:0;left:0;bottom:0;width:250px;overflow-y:auto;background:var(--site-nav-bg);
-    border-right:1px solid var(--site-border);padding:1.25rem 1rem;font:14px/1.45 system-ui,sans-serif;z-index:20}
+    border-right:1px solid var(--site-border);padding:3.6rem 1rem 1rem;font:14px/1.45 system-ui,sans-serif;z-index:20;
+    display:flex;flex-direction:column;transform:translateX(-100%);visibility:hidden;
+    transition:transform .2s ease,visibility 0s linear .2s}
+  html[data-nav="open"] #site-nav{transform:none;visibility:visible;transition:transform .2s ease,visibility 0s}
   #site-nav strong{display:block;margin-bottom:.75rem;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--site-head)}
+  #nav-links{flex:1}
   #site-nav a{display:block;color:var(--site-text);text-decoration:none;padding:.2rem .5rem;border-radius:4px}
   #site-nav a.sub{padding-left:1.4rem;font-size:13px;color:var(--site-muted)}
   #site-nav a:hover{background:var(--site-hover)}
   #site-nav a.active{background:var(--site-active-bg);color:var(--site-active-text);font-weight:600}
-  #nav-toggle{position:fixed;top:.6rem;z-index:30;padding:.4rem .7rem;cursor:pointer;
-    border:1px solid var(--site-btn-border);border-radius:6px;background:var(--site-btn-bg);color:var(--site-text);font:14px system-ui,sans-serif}
-  #nav-toggle{display:none;left:.6rem}
-  #nav-toggle:hover{background:var(--site-hover)}
-  @media(min-width:1250px){.jp-Notebook{margin-left:calc(250px + (100vw - 250px - 980px)/2)!important;margin-right:auto!important}}
-  @media(max-width:1249px){#site-nav{transform:translateX(-100%);transition:transform .2s}
-    #site-nav.open{transform:none;box-shadow:2px 0 12px rgba(0,0,0,.25)}#nav-toggle{display:block}}
-  @media print{#site-nav,#nav-toggle{display:none}}
+  .nav-foot{margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--site-border)}
+  #site-nav .nav-foot a{display:flex;align-items:center;gap:.5rem}
+  .gh-icon{width:16px;height:16px;flex:none}
+  .bar-btn{position:fixed;top:.6rem;z-index:30;display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .75rem;
+    cursor:pointer;border:1px solid var(--site-btn-border);border-radius:6px;background:var(--site-btn-bg);
+    color:var(--site-text);font:14px/1 system-ui,sans-serif;text-decoration:none}
+  .bar-btn:hover{background:var(--site-hover)}
+  .bar-btn svg{width:16px;height:16px;flex:none}
+  #nav-toggle{left:.6rem}
+  #gh-link{right:.8rem}
+  @media(min-width:1250px){html[data-nav="open"] .jp-Notebook{margin-left:calc(250px + (100vw - 250px - 980px)/2)!important;margin-right:auto!important}}
+  @media(max-width:1249px){html[data-nav="open"] #site-nav{box-shadow:2px 0 14px rgba(0,0,0,.5)}}
+  @media print{#site-nav,.bar-btn{display:none}}
 </style>
 </head>
 <body class="jp-Notebook" data-jp-theme-light="false" data-jp-theme-name="JupyterLab Dark">
@@ -10062,21 +10071,43 @@ Non-Liberal (-1)       0.74      0.71      0.72        35
 </div>
 </main>
 
-<button id="nav-toggle" aria-label="Toggle contents">Contents</button>
-<nav id="site-nav"><strong>Contents</strong></nav>
+<button id="nav-toggle" class="bar-btn" type="button" aria-controls="site-nav" aria-expanded="true" aria-label="Toggle menu"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg><span>Menu</span></button>
+<a id="gh-link" class="bar-btn" href="https://github.com" target="_blank" rel="noopener" aria-label="View this project on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+<nav id="site-nav" aria-label="Report contents"><strong>Contents</strong><div id="nav-links"></div>
+<div class="nav-foot"><a id="gh-profile" href="https://github.com" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub profile</span></a></div></nav>
 <script>
 (function(){
-  var nav=document.getElementById('site-nav'),btn=document.getElementById('nav-toggle');
-  btn.onclick=function(){nav.classList.toggle('open')};
-  var hs=document.querySelectorAll('.jp-RenderedMarkdown h1, .jp-RenderedMarkdown h2');
-  var links=[];
+  var WIDE=1250,root=document.documentElement,nav=document.getElementById('site-nav'),
+      btn=document.getElementById('nav-toggle'),box=document.getElementById('nav-links');
+  function setNav(open){
+    root.setAttribute('data-nav',open?'open':'closed');
+    btn.setAttribute('aria-expanded',open);nav.setAttribute('aria-hidden',!open);
+  }
+  setNav(root.getAttribute('data-nav')==='open');
+  btn.onclick=function(){setNav(root.getAttribute('data-nav')!=='open')};
+  document.addEventListener('click',function(e){
+    if(window.innerWidth>=WIDE||root.getAttribute('data-nav')!=='open')return;
+    if(!nav.contains(e.target)&&!btn.contains(e.target))setNav(false);
+  });
+
+  /* GitHub links: derived from the Pages URL (https://USER.github.io/REPO/) */
+  var h=location.hostname,parts=location.pathname.split('/').filter(Boolean),
+      profile='https://github.com',repo=null;
+  if(/\.github\.io$/i.test(h)){
+    profile='https://github.com/'+h.split('.')[0];
+    repo=(parts.length&&!/\.html?$/i.test(parts[0]))?profile+'/'+parts[0]:profile;
+  }
+  document.getElementById('gh-profile').href=profile;
+  document.getElementById('gh-link').href=repo||profile;
+
+  var hs=document.querySelectorAll('.jp-RenderedMarkdown h1, .jp-RenderedMarkdown h2'),links=[];
   hs.forEach(function(h){
     var t=h.textContent.replace('\u00b6','').trim();
     if(!t||t==='Table of Contents'||!h.id)return;
     var a=document.createElement('a');a.href='#'+h.id;a.textContent=t;
     if(h.tagName==='H2')a.className='sub';
-    a.onclick=function(){nav.classList.remove('open')};
-    nav.appendChild(a);links.push([h,a]);
+    a.onclick=function(){if(window.innerWidth<WIDE)setNav(false)};
+    box.appendChild(a);links.push([h,a]);
   });
   function spy(){
     var y=window.scrollY+120,cur=null;
