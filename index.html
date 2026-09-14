@@ -4,7 +4,19 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Training Classifiers on Canadian Political Data</title><link rel="icon" type="image/png" href="page_icon.png"/><link rel="apple-touch-icon" href="page_icon.png"/><script>document.documentElement.setAttribute('data-nav',window.innerWidth>=1250?'open':'closed')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Training Classifiers on Canadian Political Data</title><script>
+(function(){
+  var h=location.hostname,icon='page_icon.png',touch='page_icon.png';
+  if(/\.github\.io$/i.test(h)){
+    var u=h.split('.')[0];
+    icon='https://github.com/'+u+'.png?size=64';
+    touch='https://github.com/'+u+'.png?size=180';
+  }
+  [['icon',icon],['apple-touch-icon',touch]].forEach(function(p){
+    var l=document.createElement('link');l.rel=p[0];l.href=p[1];document.head.appendChild(l);
+  });
+})();
+</script><script>document.documentElement.setAttribute('data-nav',window.innerWidth>=1250?'open':'closed')</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -8702,7 +8714,7 @@ Standardization complete. Mean ≈ 0, Std ≈ 1 per feature.
 </thead>
 <tbody>
 <tr>
-<td><strong>PC1 (~31%)</strong></td>
+<td><strong>PC1 (~32%)</strong></td>
 <td>Most important</td>
 <td><strong>income</strong>  and <strong>education</strong>. High PC1 = wealthier and more education</td>
 </tr>
@@ -8712,18 +8724,18 @@ Standardization complete. Mean ≈ 0, Std ≈ 1 per feature.
 <td><strong>French speaker rate</strong> and <strong>age</strong>. High PC2 = older and more francophone riding</td>
 </tr>
 <tr>
-<td><strong>PC3 (~13%)</strong></td>
+<td><strong>PC3 (~17%)</strong></td>
 <td>Third</td>
 <td><strong>unemployment</strong> and <strong>housing need</strong>. PC3 = economic stress axis</td>
 </tr>
 <tr>
-<td><strong>PC4 (~9%)</strong></td>
+<td><strong>PC4 (~8%)</strong></td>
 <td>Fourth</td>
 <td><strong>population size</strong> and <strong>cycling commute rate</strong>.  PC4 = urban density.</td>
 </tr>
 <tr>
 <td><strong>PC5–PC8</strong></td>
-<td>~21% combined</td>
+<td>~17% combined</td>
 <td>Remaining variance; mostly noise in the collinear male/female feature pairs.</td>
 </tr>
 </tbody>
@@ -9211,7 +9223,7 @@ This captures interaction terms between features up to degree $d$ which allows t
 <li>Record the <strong>mean accuracy</strong> across all $k$ folds</li>
 </ol>
 <p>The combination with the highest mean CV accuracy is selected. We use <strong>stratified</strong> folds, meaning each fold is forced to have the same Liberal/Non-Liberal ratio as the full dataset.</p>
-<h3 id="Why-use-SVC-as-a-proxy-instead-of-our-custom-optimizers?">Why use <code>SVC</code> as a proxy instead of our custom optimizers?<a class="anchor-link" href="#Why-use-SVC-as-a-proxy-instead-of-our-custom-optimizers?">¶</a></h3><p>Running SA (~500,000 function evaluations per fit) or even AdaDelta (300 epochs × batches) across dozens of hyperparameter configs would take hours. Instead, we use <code>sklearn.svm.SVC</code> which solves the same SVM problem using the highly optimized <strong>LIBSVM / Sequential Minimal Optimization (SMO)</strong> algorithm as a fast proxy to find the best hyperparameters, then apply those parameters to our custom optimizers.</p>
+<h3 id="Why-use-SVC-as-a-proxy-instead-of-our-custom-optimizers?">Why use <code>SVC</code> as a proxy instead of our custom optimizers?<a class="anchor-link" href="#Why-use-SVC-as-a-proxy-instead-of-our-custom-optimizers?">¶</a></h3><p>Running SA (~300,000 function evaluations per fit) or even AdaDelta (300 epochs × batches) across dozens of hyperparameter configs would take hours. Instead, we use <code>sklearn.svm.SVC</code> which solves the same SVM problem using the highly optimized <strong>LIBSVM / Sequential Minimal Optimization (SMO)</strong> algorithm as a fast proxy to find the best hyperparameters, then apply those parameters to our custom optimizers.</p>
 <p>Note: sklearn uses $C = 1/\lambda$ convention so we convert back to $\lambda$ afterwards.</p>
 <h3 id="What-we-tune">What we tune<a class="anchor-link" href="#What-we-tune">¶</a></h3><table>
 <thead>
@@ -9911,16 +9923,16 @@ LINEAR            AdaDelta        0.681159        0.681159          0.000
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.5-Analysis">4.5 Analysis<a class="anchor-link" href="#4.5-Analysis">¶</a></h2><h3 id="PCA-vs-Raw-Features:-What-the-Delta-Table-Actually-Shows">PCA vs Raw Features: What the Delta Table Actually Shows<a class="anchor-link" href="#PCA-vs-Raw-Features:-What-the-Delta-Table-Actually-Shows">¶</a></h3><p>The results are more nuanced than a simple PCA helps or hurts verdict. PCA helped in 6 out of 9 optimizer-kernel combinations and hurt in only 2, with 1 tie. However, the magnitude of the differences matters as much as the direction.</p>
-<p>PCA clearly helped AdaDelta + Polynomial (+0.087), which is the largest swing in the entire table. Without PCA, AdaDelta + Poly achieves only 49.3%, essentially random guessing. With PCA it jumps to 57.9%. This tells us that AdaDelta struggles badly with the high-dimensional 274x274 polynomial Gram matrix, but can handle the much smaller 8-dimensional PCA representation.</p>
-<p>PCA also gave modest consistent gains to the linear kernel combinations (+0.014 for both SA and AdaDelta), likely because PCA removes the multicollinearity between male/female feature pairs which gives those optimizers a cleaner linear structure to work with.</p>
-<h3 id="Where-PCA-Hurt">Where PCA Hurt<a class="anchor-link" href="#Where-PCA-Hurt">¶</a></h3><p>The RBF + AdaDelta combination drops by 0.043 under PCA, and Poly + SA drops by 0.014. For RBF + AdaDelta, the raw feature space provides more geometric diversity in the Gaussian similarity computations which PCA's compression partially destroys. For SA + Poly on raw features, the full 16-dimensional space gives SA more room to find good polynomial interaction terms.</p>
+<h2 id="4.5-Analysis">4.5 Analysis<a class="anchor-link" href="#4.5-Analysis">¶</a></h2><h3 id="PCA-vs-Raw-Features:-What-the-Delta-Table-Actually-Shows">PCA vs Raw Features: What the Delta Table Actually Shows<a class="anchor-link" href="#PCA-vs-Raw-Features:-What-the-Delta-Table-Actually-Shows">¶</a></h3><p>The results are more nuanced than a simple PCA helps or hurts verdict. PCA helped in 4 out of 9 optimizer-kernel combinations and hurt in 2, with 3 ties. However, the magnitude of the differences matters as much as the direction.</p>
+<p>PCA clearly helped AdaDelta + Polynomial (+0.145), which is the largest swing in the entire table. Without PCA, AdaDelta + Poly achieves only 49.3%, essentially random guessing. With PCA it jumps to 63.8%. This tells us that AdaDelta struggles badly with the high-dimensional 274x274 polynomial Gram matrix, but can handle the much smaller 8-dimensional PCA representation.</p>
+<p>PCA also gave a small gain to Simulated Annealing on the linear kernel (+0.014), likely because PCA removes the multicollinearity between male/female feature pairs which gives that optimizer a cleaner linear structure to work with. BFGS and AdaDelta were unchanged on the linear kernel.</p>
+<h3 id="Where-PCA-Hurt">Where PCA Hurt<a class="anchor-link" href="#Where-PCA-Hurt">¶</a></h3><p>The RBF + AdaDelta combination drops by 0.014 under PCA, and Poly + SA also drops by 0.014. For RBF + AdaDelta, the raw feature space provides more geometric diversity in the Gaussian similarity computations which PCA's compression partially destroys. For SA + Poly on raw features, the full 16-dimensional space gives SA more room to find good polynomial interaction terms.</p>
 <h3 id="Algorithm-by-Algorithm">Algorithm-by-Algorithm<a class="anchor-link" href="#Algorithm-by-Algorithm">¶</a></h3><p><strong>Simulated Annealing:</strong> Gets a small boost from PCA on linear (+0.014), but its best result overall is on raw features with the polynomial kernel (72.5%), which is also the best single result in the entire experiment. SA benefits from PCA when the feature space reduction makes the search landscape simpler, but loses when that reduction removes useful signal. SA consistently has the longest runtime across all kernel-feature combinations because it requires hundreds of thousands of function evaluations with no gradient information to guide it. The tradeoff is that this exhaustive stochastic search is what allows it to find better solutions than the gradient-based methods in complex loss landscapes like the polynomial kernel.</p>
 <p><strong>BFGS:</strong> Completely unchanged by PCA on linear and poly (0.000 delta both times), but gains notably on RBF (+0.043). BFGS is the most stable optimizer overall. Its Hessian approximation adapts well to both feature representations.</p>
-<p><strong>AdaDelta:</strong> Shows the most extreme swings. It is rescued by PCA on the polynomial kernel (+0.087), but hurt on RBF (-0.043). AdaDelta is the most sensitive to the dimensionality and conditioning of the feature space.</p>
+<p><strong>AdaDelta:</strong> Shows the most extreme swings. It is rescued by PCA on the polynomial kernel (+0.145), but hurt on RBF (-0.014). AdaDelta is the most sensitive to the dimensionality and conditioning of the feature space.</p>
 <h3 id="Why-BFGS-and-AdaDelta-Produce-Similar-Results">Why BFGS and AdaDelta Produce Similar Results<a class="anchor-link" href="#Why-BFGS-and-AdaDelta-Produce-Similar-Results">¶</a></h3><p>Both BFGS and AdaDelta are gradient-based methods meaning they both follow the gradient of the loss function to find a minimum. Since they are both descending the same loss surface using gradient information, they tend to converge to similar regions of the parameter space and produce comparable accuracy. The main differences between them are in how they scale the gradient step: BFGS uses curvature information from the Hessian approximation to take smarter steps, while AdaDelta uses per-parameter learning rate adaptation. Despite these mechanical differences, both methods are fundamentally doing local gradient-guided descent, which is why their test accuracies often land within a few percentage points of each other across kernel-feature combinations. SA, by contrast, is not following the gradient at all. Its stochastic global search explores the loss landscape differently and can stumble into regions that gradient descent would never reach, which explains why it achieves the best result on the polynomial kernel despite being the slowest by a wide margin.</p>
 <h3 id="Best-Result">Best Result<a class="anchor-link" href="#Best-Result">¶</a></h3><p>The best single model is <strong>Simulated Annealing + Polynomial kernel + Raw features at 72.5% test accuracy</strong>. The polynomial kernel captures interaction terms between income, unemployment, French-speaker rate, and housing need. SA's global search finds a better solution in this complex polynomial loss landscape than the gradient-based methods do, at the cost of being the slowest optimizer by a significant margin.</p>
-<h3 id="Takeaway">Takeaway<a class="anchor-link" href="#Takeaway">¶</a></h3><p>PCA is neither universally helpful nor harmful here. It is a lifeline for AdaDelta on the polynomial kernel, irrelevant for BFGS on linear and poly, and mildly helpful for linear kernel methods overall. The choice of feature representation interacts strongly with the optimizer, which is itself a finding: there is no single best preprocessing choice that works across all methods. The gradient-based optimizers (BFGS and AdaDelta) converge faster but get stuck in local minima, while SA takes much longer but searches more broadly and wins overall.</p>
+<h3 id="Takeaway">Takeaway<a class="anchor-link" href="#Takeaway">¶</a></h3><p>PCA is neither universally helpful nor harmful here. It is a lifeline for AdaDelta on the polynomial kernel, irrelevant for BFGS on linear and poly, and slightly helpful for Simulated Annealing on the linear kernel. The choice of feature representation interacts strongly with the optimizer, which is itself a finding: there is no single best preprocessing choice that works across all methods. The gradient-based optimizers (BFGS and AdaDelta) converge faster but get stuck in local minima, while SA takes much longer but searches more broadly and wins overall.</p>
 </div>
 </div>
 </div>
@@ -10048,7 +10060,7 @@ Non-Liberal (-1)       0.74      0.71      0.72        35
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Summary:</strong> The results show that PCA neither consistently helps nor consistently hurts. It is most beneficial for AdaDelta on the polynomial kernel (rescuing it from near-random performance) and most harmful for RBF + AdaDelta. The best overall model is <strong>Simulated Annealing + Polynomial kernel on raw features</strong>, achieving a test accuracy of <strong>72.5%</strong>. SA's global stochastic search finds better solutions in the complex polynomial loss landscape than BFGS's local quasi-Newton descent. This winning combination will serve as the baseline for Section 5. Surely, there is a way to somehow let BFGS win?</p>
+<p><strong>Summary:</strong> The results show that PCA neither consistently helps nor consistently hurts. It is most beneficial for AdaDelta on the polynomial kernel (rescuing it from near-random performance) and slightly harmful for RBF + AdaDelta and Poly + SA. The best overall model is <strong>Simulated Annealing + Polynomial kernel on raw features</strong>, achieving a test accuracy of <strong>72.5%</strong>. SA's global stochastic search finds better solutions in the complex polynomial loss landscape than BFGS's local quasi-Newton descent. This winning combination will serve as the baseline for Section 5. Surely, there is a way to somehow let BFGS win?</p>
 </div>
 </div>
 </div>
@@ -10061,7 +10073,7 @@ Non-Liberal (-1)       0.74      0.71      0.72        35
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="5.-Conclusion">5. Conclusion<a class="anchor-link" href="#5.-Conclusion">¶</a></h1><p>This project compared three optimization algorithms, Simulated Annealing, BFGS, and AdaDelta, for training a soft-margin SVM classifier on Canadian federal election data, under two feature representations (raw standardized and PCA-reduced).</p>
 <p>Key findings:</p>
-<p><strong>PCA has mixed effects</strong> across optimizer-kernel combinations. It rescues AdaDelta on the polynomial kernel (+0.087) and provides small consistent gains on linear kernels, but hurts RBF + AdaDelta and has no effect on BFGS + linear/poly. There is no single best preprocessing choice that works for all methods.</p>
+<p><strong>PCA has mixed effects</strong> across optimizer-kernel combinations. It rescues AdaDelta on the polynomial kernel (+0.145) and gives a small gain to Simulated Annealing on the linear kernel, but slightly hurts RBF + AdaDelta and Poly + SA and has no effect on BFGS + linear/poly. There is no single best preprocessing choice that works for all methods.</p>
 <p><strong>Best model: Simulated Annealing + Polynomial kernel + Raw features</strong> achieves <strong>72.5% test accuracy</strong>. SA's global stochastic search finds better solutions in the polynomial loss landscape than BFGS's local quasi-Newton descent. The polynomial kernel captures interaction terms between income, French-speaker rate, unemployment, and housing need that neither the linear nor RBF kernel expresses as cleanly.</p>
 <p><strong>BFGS is the most stable and consistent optimizer</strong> across all kernel-feature combinations. SA achieves the single best result but at enormous computational cost. AdaDelta is the most sensitive to feature representation and benefits most from PCA on the polynomial kernel.</p>
 <p><strong>PCA interpretation revealed</strong> that the four most important axes correspond to: (PC1) socioeconomic wealth, (PC2) francophone identity, (PC3) economic hardship, and (PC4) urban density, all well-known predictors of Liberal voting in Canada.</p>
